@@ -15,7 +15,7 @@ type Thread = {
 	content: Prompt[]
 }
 
-function App() {
+export default function App() {
 	const [prompt, setPrompt] = useState<string>('')
 	const [threadId, setThreadId] = useState<string>('')
 	const [thread, setThread] = useState<Thread>({} as Thread)
@@ -32,13 +32,16 @@ function App() {
 
 		setLoading(true)
 
-		const res = await fetch('http://localhost:3001/api/generate_code', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({ prompt: prompt, threadId: threadId }),
-		})
+		const res = await fetch(
+			`${import.meta.env.VITE_SERVER_URL}/api/generate_code`,
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ prompt: prompt, threadId: threadId }),
+			}
+		)
 
 		const data = await res.json()
 
@@ -62,7 +65,9 @@ function App() {
 
 			const fetchData = async () => {
 				const res = await fetch(
-					`${import.meta.env.SERVER_URL}/api/threads/${path.slice(1)}`
+					`${
+						import.meta.env.VITE_SERVER_URL
+					}/api/threads/${path.slice(1)}`
 				)
 				const data = await res.json()
 
@@ -164,5 +169,3 @@ function App() {
 		</div>
 	)
 }
-
-export default App

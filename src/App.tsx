@@ -156,12 +156,44 @@ export default function App() {
 					defaultLanguage='python'
 					value={generatedCode}
 					options={{
-						readOnly: true,
+						// readOnly: true,
 						minimap: {
 							enabled: false,
 						},
 					}}
+					onChange={(value) => {
+						setGeneratedCode(value!)
+					}}
 				/>
+				<button
+					className='border rounded-md bg-slate-800 text-white p-2 w-1/4'
+					onClick={async () => {
+						const res = await fetch(
+							'http://localhost:3000/api/execute',
+							{
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json',
+								},
+								body: JSON.stringify({
+									code: generatedCode,
+								}),
+							}
+						)
+
+						const decoder = new TextDecoder()
+						const reader = res.body!.getReader()
+
+						while (true) {
+							const { done, value } = await reader.read()
+							if (done) {
+								break
+							}
+							console.log(decoder.decode(value))
+						}
+					}}>
+					Run
+				</button>
 				<code className='border rounded-md w-full text-white p-2 m-2'>
 					{output}
 				</code>

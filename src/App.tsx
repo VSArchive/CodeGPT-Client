@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react'
 import Editor from '@monaco-editor/react'
 import Loader from './loader'
+import ReactMarkdown from 'react-markdown'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { vs } from 'react-syntax-highlighter/dist/cjs/styles/prism'
+import CopyButton from './CopyButton'
+import { BsFillPlayFill } from 'react-icons/bs'
 
 type Prompt = {
 	role: string
@@ -83,44 +88,114 @@ export default function App() {
 
 	return (
 		<div className='flex flex-col justify-center items-center bg-slate-700 min-h-screen w-screen'>
-			<div className='flex flex-col justify-center items-center w-1/2 my-4'>
+			<div className='flex flex-col justify-center items-center my-4 md:w-4/5 lg:3/5'>
 				<h1 className='text-white text-2xl m-2'>Thread</h1>
 				<ul className='border rounded-md w-full text-white p-2 m-2'>
 					{thread &&
 						thread.content &&
 						thread.content.map((item, index) => {
-							if (item.role === 'user') {
+							if (item.role !== 'system') {
 								return (
 									<li
 										key={index}
+										className={`border-2 m-4 w-1/2 rounded-md border-white p-2 ${
+											item.content === prompt
+												? 'bg-slate-800'
+												: ''
+										} ${
+											item.role === 'user'
+												? 'ml-auto'
+												: 'mr-auto'
+										}`}
 										onClick={() => {
 											setPrompt(item.content)
 
-											if (
-												thread.content.length >
-													index + 1 &&
-												thread.content[index + 1]
-													.code !== undefined
-											) {
-												setGeneratedCode(
+											if (item.role === 'user') {
+												if (
+													thread.content.length >
+														index + 1 &&
 													thread.content[index + 1]
-														.code!
-												)
-											}
+														.code !== undefined
+												) {
+													setGeneratedCode(
+														thread.content[
+															index + 1
+														].code!
+													)
+												}
 
-											if (
-												thread.content.length >
-													index + 1 &&
-												thread.content[index + 1]
-													.output !== undefined
-											) {
-												setOutput(
+												if (
+													thread.content.length >
+														index + 1 &&
 													thread.content[index + 1]
-														.output!
-												)
+														.output !== undefined
+												) {
+													setOutput(
+														thread.content[
+															index + 1
+														].output!
+													)
+												}
 											}
 										}}>
-										{item.content}
+										<ReactMarkdown
+											className='prose dark:prose-invert'
+											components={{
+												code({ className, children }) {
+													const match =
+														/language-(\w+)/.exec(
+															className || ''
+														)
+													return match ? (
+														<div className='flex flex-row overflow-scroll'>
+															<SyntaxHighlighter
+																style={
+																	vs as any
+																}
+																language={
+																	match[1]
+																}
+																PreTag='div'
+																className='w-full m-0 rounded-md'>
+																{String(
+																	children
+																).replace(
+																	/\n$/,
+																	''
+																)}
+															</SyntaxHighlighter>
+															<div className='flex flex-col justify-evenly'>
+																<button aria-label='run'>
+																	<BsFillPlayFill className='m-2 h-6 w-6 dark:text-white' />
+																</button>
+																<CopyButton
+																	content={String(
+																		children
+																	).replace(
+																		/\n$/,
+																		''
+																	)}
+																/>
+															</div>
+														</div>
+													) : (
+														<code
+															className={
+																className
+															}>
+															{children}
+														</code>
+													)
+												},
+											}}>
+											{item.content.includes('```')
+												? item.content
+												: item.role === 'assistant'
+												? '```python\n' +
+												  item.content +
+												  '\n```'
+												: item.content}
+										</ReactMarkdown>
 									</li>
 								)
 							}

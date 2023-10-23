@@ -3,7 +3,7 @@ import Editor from '@monaco-editor/react'
 import Loader from './loader'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { vs } from 'react-syntax-highlighter/dist/cjs/styles/prism'
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 import CopyButton from './CopyButton'
 import { BsFillPlayFill } from 'react-icons/bs'
 
@@ -150,7 +150,7 @@ export default function App() {
 														<div className='flex flex-row overflow-scroll'>
 															<SyntaxHighlighter
 																style={
-																	vs as any
+																	vscDarkPlus as any
 																}
 																language={
 																	match[1]
